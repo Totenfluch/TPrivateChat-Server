@@ -16,7 +16,7 @@ import javafx.stage.WindowEvent;
 public class Main extends Application{
 	public static int ServerPort = 9987;
 	private static Thread Thread_MainServer;
-	private static Server server;
+	public static Server server;
 	public static String MyIP;
 	
 	public static void main(String[] args){

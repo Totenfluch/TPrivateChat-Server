@@ -69,11 +69,36 @@ public class CheckMessage {
 						}
 					}));
 					aftertick.play();
+					Server.reply(socket, ".confirmAdmin");
+					AdminList.put(socket, Usernames.get(socket));
 				}else{
 					System.out.println(socket.getInetAddress().toString() + " " + ComputerIP);
 				}
-				Server.reply(socket, ".confirmAdmin");
-				AdminList.put(socket, Usernames.get(socket));
+			}else if(args[0].equals(".kick")){
+				if(AdminList.containsKey(socket)){
+					System.out.println(Usernames.get(args[1]) + "hi");
+					for (Enumeration<Socket> e = Usernames.keys(); e.hasMoreElements();)
+					{
+						Enumeration<Socket> tempsocket = e;
+						Socket hn = null;
+						if(e.hasMoreElements()){
+							hn = tempsocket.nextElement();
+						}
+						String hw = Usernames.get(hn);
+						if(hw.equals(args[1])){
+							if(hn != null){
+								Server.sendToAll(".System REMOVING " + Usernames.get(hn) + " IP: " + hn.toString());
+								Main.server.removeConnection(hn);
+								System.out.println("x123" + hw);
+							}
+						}else{
+							System.out.println("x1" + hw);
+						}
+						System.out.println("x2" + hw);
+					}
+				}else{
+					// do smth
+				}
 			}
 		}
 	}

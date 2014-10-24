@@ -100,10 +100,12 @@ public class Server implements Runnable
 				}
 			});
 			System.out.println(s.getInetAddress().toString().replace("/", "") + " diconnected");
-			Server.sendToAll(".disconnect " + CheckMessage.Usernames.get(s));
-			CheckMessage.Usernames.remove(s);
-
+			if(CheckMessage.Usernames.get(s) != null && CheckMessage.Usernames.get(s) != "null"){
+				Server.sendToAll(".disconnect " + CheckMessage.Usernames.get(s));
+			}
+			if(CheckMessage.Usernames.contains(s)){
+				CheckMessage.Usernames.remove(s);
+			}
 		}
 	}
-
 }
