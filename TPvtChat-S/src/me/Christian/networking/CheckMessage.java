@@ -73,10 +73,12 @@ public class CheckMessage {
 				Server.sendToAll(".namechange " + args[1] + " " + args[2]);
 				if(!Usernames.containsKey(socket)){
 					Usernames.put(socket, GetUserChannel(socket)+"§"+args[2]);
+					Main.LogMe("User: " + args[1] + " changed Name to: " + args[2]);
 				}else{
 					String sn = GetUserChannel(socket);
 					Usernames.remove(socket);
 					Usernames.put(socket, sn+"§"+args[2]);
+					Main.LogMe("User: " + args[1] + " changed Name to: " + args[2]);
 				}
 			}else if(args[0].equals(".disconnect")){
 				if(Usernames.containsKey(socket)){
@@ -247,6 +249,7 @@ public class CheckMessage {
 		Usernames.put(s, channel+"§"+xn);
 		ChannelUsers.remove(s);
 		ChannelUsers.put(s, channel);
+		Main.LogMe("User: " + Crypter.hashit(s.toString()) + " changed channel to: " + channel);
 	}
 
 	public static void CreateChannel(String channelname, String password){
@@ -256,6 +259,7 @@ public class CheckMessage {
 			ChannelPWList.put(channelname, password);
 		}
 		ChannelList.put(channelname, true);
+		Main.LogMe("Created channel: " +channelname + " ;pw: " + Crypter.hashit(password));
 	}
 
 	public static boolean IsUserConnected(String Username){

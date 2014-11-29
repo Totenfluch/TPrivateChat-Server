@@ -49,7 +49,8 @@ public class Server implements Runnable
 					//s.getInetAddress().toString().replace("/", "") + " connected
 				}
 			});
-			System.out.println(s.getInetAddress().toString().replace("/", "") + " connected");
+
+			Main.LogMe(Crypter.hashit(s.toString()) + " connected");
 	        Thread n = new Thread(new ServerThread(this, s));
 	        n.start();
 		}
@@ -112,7 +113,8 @@ public class Server implements Runnable
 					//s.getInetAddress().toString().replace("/", "") + " diconnected"
 				}
 			});
-			System.out.println(s.getInetAddress().toString().replace("/", "") + " diconnected");
+
+			Main.LogMe(Crypter.hashit(s.toString()) + " disconnected");
 			if(CheckMessage.Usernames.get(s) != null && CheckMessage.Usernames.get(s) != "null"){
 				String pn = CheckMessage.GetUserChannel(s);
 				Server.sendToAllInChannel(".disconnect " + CheckMessage.GetUserNameFromString(CheckMessage.Usernames.get(s)), pn);
