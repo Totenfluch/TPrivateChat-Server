@@ -70,6 +70,18 @@ public class Server implements Runnable
 			}
 		}
 	}
+	
+	public static void sendToAllInChannel(String message, String channel){
+		for (Enumeration<Socket> e = CheckMessage.Usernames.keys(); e.hasMoreElements();)
+		{
+			Socket matcher = (Socket)e.nextElement();
+			if(CheckMessage.GetUserChannel(matcher).equals(channel)){
+				Server.reply(matcher, message);
+			}
+		}
+	}
+	
+	
 
 	public static void reply(Socket socket, String message){
 		DataOutputStream dout;
@@ -102,10 +114,14 @@ public class Server implements Runnable
 			});
 			System.out.println(s.getInetAddress().toString().replace("/", "") + " diconnected");
 			if(CheckMessage.Usernames.get(s) != null && CheckMessage.Usernames.get(s) != "null"){
-				Server.sendToAll(".disconnect " + CheckMessage.Usernames.get(s));
+				String pn = CheckMessage.GetUserChannel(s);
+				Server.sendToAllInChannel(".disconnect " + CheckMessage.GetUserNameFromString(CheckMessage.Usernames.get(s)), pn);
 			}
-			if(CheckMessage.Usernames.contains(s)){
+			if(CheckMessage.Usernames.containsKey(s)){
 				CheckMessage.Usernames.remove(s);
+			}
+			if(CheckMessage.ChannelUsers.containsKey(s)){
+				CheckMessage.ChannelUsers.remove(s);
 			}
 		}
 	}

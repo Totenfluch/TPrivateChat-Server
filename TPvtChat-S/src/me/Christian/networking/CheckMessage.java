@@ -33,27 +33,40 @@ public class CheckMessage {
 				if(GetUserChannel(matcher).equals(GetUserChannel(socket))){
 					Server.reply(matcher, FullMsg);
 				}
-			
 			}
 			//Server.sendToAll(FullMsg);
 		}else{
 			if(args[0].equals(".connect")){
-				Server.sendToAll(".connect " + args[1]);
+				//Server.sendToAll(".connect " + args[1]);
 				if(!Usernames.containsKey(socket)){
-					Usernames.put(socket, "Main§"+args[1]);
-					ChannelUsers.put(socket, "Main");
-				}
+					if(IsUserConnected(args[1])){
+						Server.reply(socket, ".System Username allready exists. Disconnected.");
+						Timeline aftertick = new Timeline(new KeyFrame(Duration.millis(100), new EventHandler<ActionEvent>() {
+							@Override
+							public void handle(ActionEvent event) {
+								Main.server.removeConnection(socket);
+							}
+						}));
+						aftertick.play();
+					}else{
 
-				synchronized( Usernames ) {
-					for (Enumeration<Socket> e = Usernames.keys(); e.hasMoreElements();)
-					{
-						Socket ms = e.nextElement();
-						String hw = Usernames.get(ms);
-						if(GetUserChannel(ms).equals("Main")){
-							if(ms != socket){
-								Server.reply(socket, ".connect " + GetUserNameFromString(hw));
+						Usernames.put(socket, "Main§"+args[1]);
+						ChannelUsers.put(socket, "Main");
+
+						synchronized( Usernames ) {
+							for (Enumeration<Socket> e = Usernames.keys(); e.hasMoreElements();)
+							{
+								Socket mn = (Socket)e.nextElement();
+								String hw = Usernames.get(mn);
+								if(GetUserChannel(mn).equals("Main")){
+									if(mn != socket){
+										Server.reply(mn, ".connect " + GetUserName(socket));
+										Server.reply(socket, ".connect " + GetUserNameFromString(hw));
+									}
+								}
 							}
 						}
+						Server.reply(socket, ".connect " + GetUserName(socket));
 					}
 				}
 			}else if(args[0].equals(".namechange")){
@@ -67,12 +80,13 @@ public class CheckMessage {
 				}
 			}else if(args[0].equals(".disconnect")){
 				if(Usernames.containsKey(socket)){
+					String pn = GetUserChannel(socket);
 					Usernames.remove(socket);
 					ChannelUsers.remove(socket);
-					Server.sendToAll(".disconnect " + args[1]);
+					Server.sendToAllInChannel(".disconnect " + args[1], pn);
 				}
-				
-			// TO BE EDITED!
+
+				// TO BE EDITED!
 			}else if(args[0].equals(".NOPEadmin")){
 				InetAddress lComputerIP = null;
 				try {
@@ -136,8 +150,8 @@ public class CheckMessage {
 									synchronized( Usernames ) {
 										for (Enumeration<Socket> e = Usernames.keys(); e.hasMoreElements();)
 										{
-											String hw = Usernames.get(e.nextElement());
 											Socket tn = (Socket)e.nextElement();
+											String hw = Usernames.get(tn);
 											if(GetUserChannel(tn).equals(args[1])){
 												if(tn != socket){
 													Server.reply(socket, ".connect " + GetUserNameFromString(hw));
@@ -155,12 +169,11 @@ public class CheckMessage {
 							synchronized( Usernames ) {
 								for (Enumeration<Socket> e = Usernames.keys(); e.hasMoreElements();)
 								{
-									String hw = Usernames.get(e.nextElement());
 									Socket mn = (Socket)e.nextElement();
+									String hw = Usernames.get(mn);
 									if(GetUserChannel(mn).equals(args[1])){
-										if(socket != mn){
-											Server.reply(mn, ".connect " + GetUserNameFromString(hw));
-										}
+										Server.reply(mn, ".connect " + GetUserName(socket));
+										Server.reply(socket, ".connect " + GetUserNameFromString(hw));
 									}
 								}
 							}
@@ -199,7 +212,7 @@ public class CheckMessage {
 
 		return channelname;
 	}
-	
+
 	public static String GetUserNameFromString(String st){
 		String usernameZ = null;
 
@@ -234,10 +247,8 @@ public class CheckMessage {
 		Usernames.put(s, channel+"§"+xn);
 		ChannelUsers.remove(s);
 		ChannelUsers.put(s, channel);
-		System.out.println("Changed Channel of User:" + s + " |X| " + channel);
-		System.out.println(Usernames.get(s));
 	}
-	
+
 	public static void CreateChannel(String channelname, String password){
 		if(password.equals("")){
 			ChannelPWList.put(channelname, " ");
@@ -245,6 +256,19 @@ public class CheckMessage {
 			ChannelPWList.put(channelname, password);
 		}
 		ChannelList.put(channelname, true);
+	}
+
+	public static boolean IsUserConnected(String Username){
+		boolean connected = false;
+		for (Enumeration<Socket> e = Usernames.keys(); e.hasMoreElements();)
+		{
+			String hw = GetUserNameFromString(Usernames.get((Socket)e.nextElement()));
+			if(hw.equals(Username)){
+				connected = true;
+				return true;
+			}
+		}
+		return connected;
 	}
 }
 
