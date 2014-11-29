@@ -12,6 +12,7 @@ public class Server implements Runnable
 	private ServerSocket ss;
 
 	public static Hashtable<Socket, DataOutputStream> outputStreams = new Hashtable<Socket, DataOutputStream>();
+	public static DataOutputStream dout;
 	
 	public void run() {
 		
@@ -32,7 +33,7 @@ public class Server implements Runnable
 				e.printStackTrace();
 			}
 
-			DataOutputStream dout = null;
+			dout = null;
 			try {
 				dout = new DataOutputStream( s.getOutputStream() );
 			} catch (IOException e) {

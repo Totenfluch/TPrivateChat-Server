@@ -19,37 +19,61 @@ public class CheckMessage {
 	public static Hashtable<Socket, String> Usernames = new Hashtable<Socket, String>();
 	public static Hashtable<Socket, String> AdminList = new Hashtable<Socket, String>();
 
+
+	public static Hashtable<String, Boolean> ChannelList = new Hashtable<String, Boolean>();
+	public static Hashtable<Socket, String> ChannelUsers = new Hashtable<Socket, String>();
+
+	public static Hashtable<String, String> ChannelPWList = new Hashtable<String, String>();
+
 	public static void ParseMessage(Socket socket, String[] args, String FullMsg){
 		if(!FullMsg.startsWith(".")){
-			Server.sendToAll(FullMsg);
+			for (Enumeration<Socket> e = Usernames.keys(); e.hasMoreElements();)
+			{
+				Socket matcher = (Socket)e.nextElement();
+				if(GetUserChannel(matcher).equals(GetUserChannel(socket))){
+					Server.reply(matcher, FullMsg);
+				}
+			
+			}
+			//Server.sendToAll(FullMsg);
 		}else{
 			if(args[0].equals(".connect")){
 				Server.sendToAll(".connect " + args[1]);
 				if(!Usernames.containsKey(socket)){
-					Usernames.put(socket, args[1]);
+					Usernames.put(socket, "Main§"+args[1]);
+					ChannelUsers.put(socket, "Main");
 				}
 
 				synchronized( Usernames ) {
 					for (Enumeration<Socket> e = Usernames.keys(); e.hasMoreElements();)
 					{
-						String hw = Usernames.get(e.nextElement());
-						Server.reply(socket, ".connect " + hw);
+						Socket ms = e.nextElement();
+						String hw = Usernames.get(ms);
+						if(GetUserChannel(ms).equals("Main")){
+							if(ms != socket){
+								Server.reply(socket, ".connect " + GetUserNameFromString(hw));
+							}
+						}
 					}
 				}
 			}else if(args[0].equals(".namechange")){
 				Server.sendToAll(".namechange " + args[1] + " " + args[2]);
 				if(!Usernames.containsKey(socket)){
-					Usernames.put(socket, args[2]);
+					Usernames.put(socket, GetUserChannel(socket)+"§"+args[2]);
 				}else{
+					String sn = GetUserChannel(socket);
 					Usernames.remove(socket);
-					Usernames.put(socket, args[2]);
+					Usernames.put(socket, sn+"§"+args[2]);
 				}
 			}else if(args[0].equals(".disconnect")){
 				if(Usernames.containsKey(socket)){
 					Usernames.remove(socket);
+					ChannelUsers.remove(socket);
 					Server.sendToAll(".disconnect " + args[1]);
 				}
-			}else if(args[0].equals(".admin")){
+				
+			// TO BE EDITED!
+			}else if(args[0].equals(".NOPEadmin")){
 				InetAddress lComputerIP = null;
 				try {
 					lComputerIP = InetAddress.getLocalHost();
@@ -99,8 +123,128 @@ public class CheckMessage {
 				}else{
 					// do smth
 				}
+			}else if(args[0].equals(".channel")){
+				// do smth
+				if(ChannelList.containsKey(args[1])){
+					String temppw;
+					if(ChannelPWList.containsKey(args[1])){
+						temppw = ChannelPWList.get(args[1]);
+						if(temppw != " "){
+							if(args.length >= 2){
+								if(temppw.equals(args[2])){
+									Server.reply(socket, ".System You got connected to: " + args[1]);
+									synchronized( Usernames ) {
+										for (Enumeration<Socket> e = Usernames.keys(); e.hasMoreElements();)
+										{
+											String hw = Usernames.get(e.nextElement());
+											Socket tn = (Socket)e.nextElement();
+											if(GetUserChannel(tn).equals(args[1])){
+												if(tn != socket){
+													Server.reply(socket, ".connect " + GetUserNameFromString(hw));
+												}
+											}
+										}
+									}
+								}else{
+									Server.reply(socket, ".System Connection to PRIVATE Channel Refused");
+								}
+							}
+						}else{
+							Server.reply(socket, ".System You got connected to: " + args[1]);
+							ChangeUserChannel(socket, args[1]);
+							synchronized( Usernames ) {
+								for (Enumeration<Socket> e = Usernames.keys(); e.hasMoreElements();)
+								{
+									String hw = Usernames.get(e.nextElement());
+									Socket mn = (Socket)e.nextElement();
+									if(GetUserChannel(mn).equals(args[1])){
+										if(socket != mn){
+											Server.reply(mn, ".connect " + GetUserNameFromString(hw));
+										}
+									}
+								}
+							}
+						}
+					}
+
+				}else{
+					ChannelList.put(args[1], true);
+					if(args.length > 2){
+						CreateChannel(args[1], args[2]);
+						Server.reply(socket, ".System Created Channel: " + args[1] + " pw:" + args[2]);
+						Server.reply(socket, ".connect " + GetUserName(socket));
+						ChangeUserChannel(socket, args[1]);
+					}else{
+						CreateChannel(args[1], "");
+						Server.reply(socket, ".System Created Channel: " + args[1]);
+						Server.reply(socket, ".connect " + GetUserName(socket));
+						ChangeUserChannel(socket, args[1]);
+					}
+				}
 			}
 		}
+	}
+
+	public static String GetUserChannel(Socket s){
+		String channelname = null;
+
+		String UsernameANDchannel = Usernames.get(s);
+		String tobereplaced = "§";
+		String temp[] = UsernameANDchannel.split(tobereplaced);
+		if(temp.length >= 1){
+			channelname = temp[0];
+		}else{
+			Main.server.removeConnection(s);
+		}
+
+		return channelname;
+	}
+	
+	public static String GetUserNameFromString(String st){
+		String usernameZ = null;
+
+		String UsernameANDchannel = st;
+		String tobereplaced = "§";
+		String temp[] = UsernameANDchannel.split(tobereplaced);
+		if(temp.length >= 1){
+			usernameZ = temp[1];
+		}
+		System.out.println(usernameZ);
+		return usernameZ;
+	}
+
+	public static String GetUserName(Socket s){
+		String usernameZ = null;
+
+		String UsernameANDchannel = Usernames.get(s);
+		String tobereplaced = "§";
+		String temp[] = UsernameANDchannel.split(tobereplaced);
+		if(temp.length >= 1){
+			usernameZ = temp[1];
+		}else{
+			Main.server.removeConnection(s);
+		}
+		System.out.println(usernameZ);
+		return usernameZ;
+	}
+
+	public static void ChangeUserChannel(Socket s, String channel){
+		String xn = GetUserName(s);
+		Usernames.remove(s);
+		Usernames.put(s, channel+"§"+xn);
+		ChannelUsers.remove(s);
+		ChannelUsers.put(s, channel);
+		System.out.println("Changed Channel of User:" + s + " |X| " + channel);
+		System.out.println(Usernames.get(s));
+	}
+	
+	public static void CreateChannel(String channelname, String password){
+		if(password.equals("")){
+			ChannelPWList.put(channelname, " ");
+		}else{
+			ChannelPWList.put(channelname, password);
+		}
+		ChannelList.put(channelname, true);
 	}
 }
 
