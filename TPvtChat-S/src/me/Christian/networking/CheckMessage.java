@@ -149,15 +149,15 @@ public class CheckMessage {
 							if(args.length >= 2){
 								if(temppw.equals(args[2])){
 									Server.reply(socket, ".System You got connected to: " + args[1]);
+									ChangeUserChannel(socket, args[1]);
 									synchronized( Usernames ) {
 										for (Enumeration<Socket> e = Usernames.keys(); e.hasMoreElements();)
 										{
-											Socket tn = (Socket)e.nextElement();
-											String hw = Usernames.get(tn);
-											if(GetUserChannel(tn).equals(args[1])){
-												if(tn != socket){
-													Server.reply(socket, ".connect " + GetUserNameFromString(hw));
-												}
+											Socket mn = (Socket)e.nextElement();
+											String hw = Usernames.get(mn);
+											if(GetUserChannel(mn).equals(args[1])){
+												Server.reply(mn, ".connect " + GetUserName(socket));
+												Server.reply(socket, ".connect " + GetUserNameFromString(hw));
 											}
 										}
 									}
@@ -224,7 +224,6 @@ public class CheckMessage {
 		if(temp.length >= 1){
 			usernameZ = temp[1];
 		}
-		System.out.println(usernameZ);
 		return usernameZ;
 	}
 
@@ -239,7 +238,6 @@ public class CheckMessage {
 		}else{
 			Main.server.removeConnection(s);
 		}
-		System.out.println(usernameZ);
 		return usernameZ;
 	}
 
