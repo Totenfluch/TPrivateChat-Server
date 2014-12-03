@@ -243,6 +243,9 @@ public class CheckMessage {
 
 	public static void ChangeUserChannel(Socket s, String channel){
 		String xn = GetUserName(s);
+		String cname = GetUserChannel(s);
+		Server.sendToAllInChannel(".disconnect " + xn, cname);
+		
 		Usernames.remove(s);
 		Usernames.put(s, channel+"§"+xn);
 		ChannelUsers.remove(s);
