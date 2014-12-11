@@ -88,7 +88,7 @@ public class Main extends Application{
 		Platform.runLater(new Runnable() {
 			@Override
 			public void run() {
-				LogArea.appendText(text);
+				LogArea.appendText(text+"\n");
 			}
 		});
 	}

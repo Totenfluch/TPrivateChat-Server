@@ -244,12 +244,15 @@ public class CheckMessage {
 	public static void ChangeUserChannel(Socket s, String channel){
 		String xn = GetUserName(s);
 		String cname = GetUserChannel(s);
-		Server.sendToAllInChannel(".disconnect " + xn, cname);
 		
 		Usernames.remove(s);
 		Usernames.put(s, channel+"§"+xn);
 		ChannelUsers.remove(s);
 		ChannelUsers.put(s, channel);
+		
+		Server.sendToAllInChannel(".disconnect " + xn, cname);
+		Main.LogMe("Sending: '.disconnect " + xn + "' to Everyone in " + cname);
+		
 		Main.LogMe("User: " + Crypter.hashit(s.toString()) + " changed channel to: " + channel);
 	}
 
