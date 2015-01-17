@@ -36,7 +36,9 @@ public class CheckMessage {
 			}
 			//Server.sendToAll(FullMsg);
 		}else{
-			if(args[0].equals(".connect")){
+			if(args[0].equals(".ACA")){
+				Server.sendToAllInChannel(".ACA", GetUserChannel(socket));
+			}else if(args[0].equals(".connect")){
 				//Server.sendToAll(".connect " + args[1]);
 				if(!Usernames.containsKey(socket)){
 					if(IsUserConnected(args[1])){
