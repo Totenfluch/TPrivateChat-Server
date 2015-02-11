@@ -1,9 +1,7 @@
 package me.Christian.networking;
 
 
-import java.net.InetAddress;
 import java.net.Socket;
-import java.net.UnknownHostException;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Map.Entry;
@@ -93,13 +91,6 @@ public class CheckMessage {
 
 				// TO BE EDITED!
 			}else if(args[0].equals(".NOPEadmin")){
-				InetAddress lComputerIP = null;
-				try {
-					lComputerIP = InetAddress.getLocalHost();
-				} catch (UnknownHostException e1) {
-					e1.printStackTrace();
-				}
-				String ComputerIP = lComputerIP.getHostAddress();
 				if(socket.getInetAddress().toString().contains(Main.MyIP) || socket.getInetAddress().toString().contains("127.0.0.1")){
 					String n = "." + Usernames.get(socket);
 					Usernames.remove(socket);
@@ -114,8 +105,6 @@ public class CheckMessage {
 					aftertick.play();
 					Server.reply(socket, ".confirmAdmin");
 					AdminList.put(socket, Usernames.get(socket));
-				}else{
-					System.out.println(socket.getInetAddress().toString() + " " + ComputerIP);
 				}
 			}else if(args[0].equals(".kick")){
 				if(AdminList.containsKey(socket)){
@@ -200,25 +189,26 @@ public class CheckMessage {
 					}
 				}
 			}else if(args[0].equals(".admincmd")){
-				InetAddress lComputerIP = null;
-				try {
-					lComputerIP = InetAddress.getLocalHost();
-				} catch (UnknownHostException e1) {
-					e1.printStackTrace();
-				}
-				String ComputerIP = lComputerIP.getHostAddress();
 				if(socket.getInetAddress().toString().contains(Main.MyIP) || socket.getInetAddress().toString().contains("127.0.0.1")){
-					if(args[1] != null){
+					if(args.length >= 2){
 						if(args[1].equals("kick")){
-							if(args[2] != null){
-								Main.server.removeConnection(GetSocketFromUsername(args[2]));
+							if(args.length >= 3){
+								System.out.println("x " + args[2]);
+								Socket kicksocket = GetSocketFromUsername(args[2]);
+								if(kicksocket != null){
+									Main.server.removeConnection(kicksocket);
+									if(args.length >= 4){
+										if(args[3].equals("-a")){
+											Server.sendToAllInChannel(".System kicked " + args[2], GetUserChannel(socket));
+										}
+									}
+								}
 							}
 						}
 					}
 				}else{
 					Server.reply(socket, ".System Verification failed.");
 				}
-				System.out.println("ADMINSTUFF: " + socket.getInetAddress().toString() + " " + ComputerIP);
 			}
 		}
 	}
@@ -305,12 +295,12 @@ public class CheckMessage {
 	public static Socket GetSocketFromUsername(String s){
 		Socket key= null;
 		String value = s;
+		
 		for(Entry<Socket, String> entry: Usernames.entrySet()){
-			if(value.equals(entry.getValue())){
-				key = entry.getKey();
-				break;
-			}
-		}
+            if(value.equals(GetUserNameFromString(entry.getValue()))){
+               key = entry.getKey();
+            }
+        }
 		return key;
 	}
 }
