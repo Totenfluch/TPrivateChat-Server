@@ -6,6 +6,7 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.Map.Entry;
 
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -198,6 +199,26 @@ public class CheckMessage {
 						ChangeUserChannel(socket, args[1]);
 					}
 				}
+			}else if(args[0].equals(".admincmd")){
+				InetAddress lComputerIP = null;
+				try {
+					lComputerIP = InetAddress.getLocalHost();
+				} catch (UnknownHostException e1) {
+					e1.printStackTrace();
+				}
+				String ComputerIP = lComputerIP.getHostAddress();
+				if(socket.getInetAddress().toString().contains(Main.MyIP) || socket.getInetAddress().toString().contains("127.0.0.1")){
+					if(args[1] != null){
+						if(args[1].equals("kick")){
+							if(args[2] != null){
+								Main.server.removeConnection(GetSocketFromUsername(args[2]));
+							}
+						}
+					}
+				}else{
+					Server.reply(socket, ".System Verification failed.");
+				}
+				System.out.println("ADMINSTUFF: " + socket.getInetAddress().toString() + " " + ComputerIP);
 			}
 		}
 	}
@@ -246,15 +267,15 @@ public class CheckMessage {
 	public static void ChangeUserChannel(Socket s, String channel){
 		String xn = GetUserName(s);
 		String cname = GetUserChannel(s);
-		
+
 		Usernames.remove(s);
 		Usernames.put(s, channel+"§"+xn);
 		ChannelUsers.remove(s);
 		ChannelUsers.put(s, channel);
-		
+
 		Server.sendToAllInChannel(".disconnect " + xn, cname);
 		Main.LogMe("Sending: '.disconnect " + xn + "' to Everyone in " + cname);
-		
+
 		Main.LogMe("User: " + Crypter.hashit(s.toString()) + " changed channel to: " + channel);
 	}
 
@@ -279,6 +300,18 @@ public class CheckMessage {
 			}
 		}
 		return connected;
+	}
+
+	public static Socket GetSocketFromUsername(String s){
+		Socket key= null;
+		String value = s;
+		for(Entry<Socket, String> entry: Usernames.entrySet()){
+			if(value.equals(entry.getValue())){
+				key = entry.getKey();
+				break;
+			}
+		}
+		return key;
 	}
 }
 
